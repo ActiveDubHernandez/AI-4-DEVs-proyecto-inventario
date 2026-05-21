@@ -1,204 +1,142 @@
-# Prompts del Curso — proyecto-inventario
+# Prompts del Curso — Sistema de Gestión de Inventario (AI4DEVs)
 
-Registro de prompts utilizados para la generación y evolución del proyecto.
+Registro oficial e histórico de los prompts reales utilizados durante las sesiones iterativas con la IA (Cursor Composer y Chat) para el desarrollo, depuración, testing y despliegue del proyecto final.
 
 ---
 
-## Fase 1: Generación inicial de requerimientos
+## 📅 Día 1 & 2: Documentación de Requerimientos y Configuración del Entorno
 
-**Contexto:** Generación inicial de requerimientos funcionales, técnicos y modelado de negocio basados en las especificaciones del curso.
+**Contexto de Uso:** Generación inicial de la visión de negocio, requerimientos técnicos, historias de usuario e infraestructura base de la base de datos basándose en el enunciado general.
 
-**Prompt:**
-
-> Actúa como un Product Manager y Arquitecto de Software Senior. Genera la documentación técnica del sistema de gestión de inventario para las carpetas creadas.
->
+### Prompt Exacto Enviado:
+> Actúa como un Product Manager y Arquitecto de Software Senior. Genera la documentación técnica del sistema de gestión de inventario para las carpetas creadas. 
 > Escribe el contenido completo para:
->
 > 1. `docs/PRD.md`: Incluye objetivo, alcance, restricciones técnicas (NestJS, React, TypeORM, PostgreSQL) y criterios de aceptación detallados.
 > 2. `docs/user-stories.md`: Genera exactamente 6 historias de usuario en formato Gherkin (4 de backend para CRUD de productos, registro de movimientos, cálculo de stock y alertas; 2 de frontend para visualización de lista y formulario).
 > 3. `docs/tickets.md`: Desglosa cada historia en un ticket con criterios de aceptación técnicos y formato Markdown.
->
 > Genera también el diseño del modelo de datos en texto relacional (Diagrama ER en Mermaid) y arquitectura C4 básica. Dame el código listo para volcar en cada archivo markdown.
 
-**Artefactos generados:**
-
-| Archivo | Contenido |
-| --- | --- |
-| `docs/PRD.md` | PRD, modelo relacional, ER Mermaid, C4 Context + Container |
-| `docs/user-stories.md` | 6 historias Gherkin (US-BE-01 a US-FE-02) |
-| `docs/tickets.md` | TICKET-001 a TICKET-006 con AC técnicos |
-
----
-
-## Fase 2: Creación de entidades y base de datos
-
-**Contexto:** Creación de las entidades de base de datos relacional mitigando condiciones de carrera e impactos en concurrencia.
-
-**Prompt:**
-
-> Basándote en las especificaciones del proyecto y el archivo `.cursorrules`, crea las entidades TypeORM (`Product` y `Movement`) en sus respectivas carpetas (`backend/src/products/entities/product.entity.ts` y `backend/src/movements/entities/movement.entity.ts`).
->
-> - **Product:** id (uuid), nombre, descripción, unidadDeMedida (enum: unidades, kg, litros), categoría, stockMinimo (number), estado (boolean: activo/inactivo).
-> - **Movement:** id (uuid), tipo (enum: entrada, salida), cantidad (int), fecha (date), razon (enum: compra, venta, ajuste, merma, devolución) y relación ManyToOne con Product.
->
+### Prompt de Modelado de Entidades:
+> Basándote en las especificaciones del proyecto y el archivo `.cursorrules`, crea las entidades TypeORM (`Product` y `Movement`) en sus respectivas carpetas (`backend/src/products/entities/product.entity.ts` y `backend/src/movements/entities/movement.entity.ts`). 
+> - `Product`: id (uuid), nombre, descripción, unidadDeMedida (enum: unidades, kg, litros), categoría, stockMinimo (number), estado (boolean: activo/inactivo).
+> - `Movement`: id (uuid), tipo (enum: entrada, salida), cantidad (int), fecha (date), razon (enum: compra, venta, ajuste, merma, devolución) y relación ManyToOne con Product.
 > Configura los módulos e inicializa la conexión PostgreSQL en `app.module.ts`.
 
-**Artefactos generados:**
-
-| Archivo | Contenido |
-| --- | --- |
-| `backend/src/products/entities/product.entity.ts` | Entidad `Product` + enum `UnitOfMeasure` |
-| `backend/src/movements/entities/movement.entity.ts` | Entidad `Movement` + enums tipo/razón |
-| `backend/src/products/products.module.ts` | `TypeOrmModule.forFeature([Product])` |
-| `backend/src/movements/movements.module.ts` | `TypeOrmModule.forFeature([Movement])` |
-| `backend/src/app.module.ts` | `ConfigModule` + `TypeOrmModule.forRootAsync` |
-| `backend/.env.example` | Variables de conexión PostgreSQL |
+**Reflexión y Refinamiento:** La IA estructuró la documentación en Gherkin de forma impecable. El uso de Cursor Composer facilitó la creación en paralelo de las dos entidades y los módulos iniciales de NestJS respetando Clean Architecture sin perder tiempo tipeando código base.
 
 ---
 
-## Fase 3: Controladores, servicios y lógica de negocio
+## 📅 Día 3 & 4: Desarrollo del Backend y Lógica de Negocio
 
-**Contexto:** Inyección de lógica de validación crítica en base de datos y endpoints transaccionales.
+**Contexto de Uso:** Implementación transaccional de los servicios del servidor, inyección de validaciones críticas en base de datos para evitar inconsistencias numéricas y condiciones de carrera.
 
-**Prompt:**
+### Prompt Exacto Enviado:
+> Implementa por completo los controladores, servicios y DTOs para los módulos `products`, `movements` e `inventory` siguiendo la estructura definida en la imagen del árbol de directorios. Debes cumplir rigurosamente con las siguientes reglas de negocio:
+> 1. Un producto NO puede ser eliminado físicamente si tiene movimientos asociados; el método DELETE debe cambiar su estado a inactivo.
+> 2. El registro de un movimiento de tipo 'salida' debe validar mediante una Transacción de TypeORM que la cantidad no supere el stock actual disponible para garantizar consistencia ante peticiones simultáneas.
+> 3. El módulo `inventory` debe calcular el stock en tiempo real usando funciones de agregación (suma de entradas menos suma de salidas).
+> 4. Implementa el endpoint `/inventory/alerts/low-stock` que devuelva los productos cuyo stock actual sea menor o igual a su stock mínimo configurado.
+> 5. El historial de movimientos debe permitir filtrar dinámicamente por producto, tipo de movimiento y rango de fechas, validando que fechaInicio no sea posterior a fechaFin.
+> Genera todo el código de producción listo.
 
-> Implementa por completo los controladores, servicios y DTOs para los módulos `products`, `movements` e `inventory`…
-> (reglas de negocio: soft delete, transacción en salidas, stock por agregación, alertas low-stock, filtros de historial).
-
-**Artefactos generados:**
-
-| Área | Endpoints |
-| --- | --- |
-| `products` | CRUD REST `/products` |
-| `movements` | `POST /movements`, `GET /movements` con filtros |
-| `inventory` | `GET /inventory/products/:id/stock`, `GET /inventory/alerts/low-stock` |
+**Reflexión y Refinamiento:** Fue necesario insistir mediante contexto en que el cálculo del inventario combinara correctamente las funciones `SUM` agrupadas por ID. La solución transaccional con `DataSource.transaction` blindó el endpoint críticamente contra stocks negativos simulados simultáneamente.
 
 ---
 
-## Fase 4: Conexión de API y pantalla lista de productos
+## 📅 Día 5 & 6: Desarrollo del Frontend en React (Lista y Formulario)
 
-**Contexto:** Consumo de la API de inventario y renderizado de componentes reactivos con alertas visuales.
+**Contexto de Uso:** Creación de componentes reactivos en TypeScript, consumo asíncrono de endpoints y maquetación de lógica de alertas visuales en tiempo real.
 
-**Prompt:**
+### Prompt de la Pantalla de Productos:
+> Actúa como un Desarrollador Frontend Senior en React + TypeScript + Vite. Vamos a crear los componentes base del sistema:
+> 1. Implementa `frontend/src/services/api.ts` usando Axios configurado para conectarse al backend.
+> 2. Crea el componente `frontend/src/components/StockBadge.tsx` que reciba el stock actual y el stock mínimo. Si el stockActual <= stockMinimo, debe renderizar un badge visual rojo de alerta de peligro.
+> 3. Crea la página principal `frontend/src/pages/ProductList.tsx` y su componente de soporte `ProductCard.tsx`. Debe listar todos los productos activos consumiendo el endpoint del backend, mostrando nombre, categoría, unidad de medida, stock actual y el `StockBadge`. Debe incluir un botón para ir a registrar un movimiento para ese producto específico.
 
-> Implementa `api.ts` con Axios, `StockBadge.tsx`, `ProductList.tsx` y `ProductCard.tsx` consumiendo productos activos y stock en tiempo real.
+### Prompt del Formulario de Movimientos:
+> Implementa la página `frontend/src/pages/MovementForm.tsx` junto con su componente interno `frontend/src/components/MovementForm.tsx`. 
+> Requisitos del formulario:
+> - Selectores dinámicos para elegir el producto, el tipo de movimiento (entrada/salida) y la razón del movimiento.
+> - Campo de cantidad con validación en tiempo real: debe ser un entero positivo superior a cero.
+> - Si el usuario selecciona 'salida', el componente debe consultar inmediatamente al endpoint `/inventory/:productId` del backend, mostrar de forma clara el stock disponible y validar que la cantidad ingresada por el usuario no supere dicho límite. Si lo supera, se bloquea el botón de enviar y se muestra un mensaje de error.
+> - Al hacer submit exitoso contra `POST /movements`, debe dar feedback visual positivo y redirigir al usuario a la lista de productos.
 
-**Artefactos generados:**
-
-| Archivo | Descripción |
-| --- | --- |
-| `frontend/src/services/api.ts` | Cliente Axios + fetch productos y stock |
-| `frontend/src/components/StockBadge.tsx` | Badge rojo si `stockActual <= stockMinimo` |
-| `frontend/src/components/ProductCard.tsx` | Tarjeta de producto con enlace a movimiento |
-| `frontend/src/pages/ProductList.tsx` | Lista principal con estados loading/error |
-| `frontend/.env.example` | `VITE_API_URL` |
-
----
-
-## Fase 5: Formulario de registro de movimientos
-
-**Contexto:** Formulario reactivo con validaciones asíncronas en tiempo real previas al envío de cargas útiles.
-
-**Prompt:**
-
-> Implementa `pages/MovementForm.tsx` y `components/MovementForm.tsx` con selectores dinámicos, validación de cantidad, consulta de stock en salidas y `POST /movements`.
-
-**Artefactos generados:**
-
-| Archivo | Descripción |
-| --- | --- |
-| `frontend/src/components/MovementForm.tsx` | Formulario con validación en tiempo real y bloqueo de envío |
-| `frontend/src/pages/MovementForm.tsx` | Página con `productId` desde query string |
-| `frontend/src/types/movement.ts` | Tipos del movimiento |
-| `frontend/src/services/api.ts` | `createMovement()` |
+**Reflexión y Refinamiento:** El uso de Axios interceptó adecuadamente el flujo asíncrono. La reactividad al cambiar el switch a 'salida' demostró una excelente experiencia de usuario (UX) al deshabilitar el botón de envío inmediatamente si el inventario local es insuficiente.
 
 ---
 
-## Fase 6: Pruebas unitarias y PBT (fast-check)
+## 📅 Día 8: Pruebas Unitarias y Property Based Testing (PBT)
 
-**Contexto:** Robustecimiento de la suite de pruebas mediante testing unitario clásico y PBT.
+**Contexto de Uso:** Verificación matemática y determinista de las reglas universales del negocio usando inputs y secuencias de datos aleatorios.
 
-**Prompt:**
+### Prompt Exacto Enviado:
+> Genera la suite completa de pruebas para el backend utilizando Jest y fast-check:
+> 1. Escribe un mínimo de 10 pruebas unitarias en Jest cubriendo: el flujo feliz de creación de productos, el bloqueo de eliminación física de productos con movimientos, desactivación lógica, transacciones en salidas exitosas y errores cuando la cantidad supera el stock real.
+> 2. Implementa de forma explícita Property Based Testing (PBT) con la librería `fast-check` para verificar estas 3 propiedades críticas del negocio indicadas en el PDF:
+>    - P1 (Stock nunca negativo): Ninguna combinación de salidas simuladas aleatorias puede dejar el inventario final por debajo de cero.
+>    - P2 (Cantidad siempre entera positiva): El sistema rechaza de forma determinista inputs de cantidades <= 0 o decimales.
+>    - P3 (Stock consistente con movimientos): El stock calculado debe coincidir matemáticamente de forma exacta con la fórmula: Suma de Entradas - Suma de Salidas.
+> Entrégame los archivos de pruebas `.spec.ts` estructurados.
 
-> Genera pruebas Jest + fast-check: mínimo 10 unitarias y propiedades P1 (stock no negativo), P2 (cantidad entera positiva), P3 (stock = entradas - salidas).
-
-**Artefactos generados:**
-
-| Archivo | Tipo |
-| --- | --- |
-| `products/products.service.spec.ts` | Unitarias CRUD / soft delete |
-| `movements/movements.service.spec.ts` | Unitarias transacciones y salidas |
-| `inventory/inventory.service.spec.ts` | Unitarias agregación de stock |
-| `common/utils/stock.math.ts` | Lógica pura para PBT |
-| `common/utils/stock.math.pbt.spec.ts` | P1 y P3 |
-| `movements/dto/create-movement.dto.pbt.spec.ts` | P2 validación DTO |
-| `movements/movements.service.pbt.spec.ts` | P1 capa servicio |
+**Reflexión y Refinamiento:** Fast-check descubrió inicialmente un caso borde con valores flotantes no controlados en la entrada de datos. Se refinó el backend agregando un pipe de validación global (`ParseIntPipe` / `IsInt`) para forzar tipos enteros estrictos antes de que la lógica de TypeORM procesara la consulta.
 
 ---
 
-## Fase 7: Mutation Testing (Stryker)
+## 📅 Día 9: Robustecimiento de Asserts mediante Mutation Testing (Stryker)
 
-**Contexto:** Medición de la efectividad de los asserts inyectando mutantes sintácticos en la lógica del backend.
+**Contexto de Uso:** Evaluación del nivel de cobertura real de los asserts mediante la inyección de mutantes matemáticos y lógicos en el código compilado del backend.
 
-**Prompt:**
+### Prompt Exacto Enviado:
+> Escribe el archivo de configuración ideal `stryker.config.json` para ejecutar mutation testing sobre el backend de NestJS utilizando el runner de Jest. Además, escribe pruebas unitarias hyper-específicas orientadas a matar preventivamente los mutantes críticos definidos en la guía del curso:
+> - M3 (Validación de salida): Asegurar que se rechacen los casos en donde se intente retirar una cantidad exactamente igual a `stockActual + 1` y que pase perfectamente cuando sea exactamente igual a `stockActual`.
+> - M4 (Tipo de movimiento): Garantizar que un test verifique que las entradas sumen y las salidas resten de manera estricta y aislada.
+> - M8 (Alerta de stock mínimo): Prueba específica que valide que un producto con stock idéntico al stock mínimo active la alerta de manera exacta.
 
-> Configura `stryker.config.json` con runner Jest y pruebas hyper-específicas para mutantes M3, M4 y M8.
-
-**Artefactos generados:**
-
-| Archivo | Descripción |
-| --- | --- |
-| `backend/stryker.config.json` | Configuración Stryker + Jest |
-| `backend/jest.config.js` | Config Jest dedicada para Stryker |
-| `backend/src/critical-mutants.spec.ts` | Tests M3 (límite salida), M4 (tipos), M8 (alerta exacta) |
-| `npm run test:mutation` | Ejecuta mutation testing |
+**Reflexión y Refinamiento:** Stryker arrojó originalmente un mutante vivo en la condición de frontera del operador `<=`. La suite se fortaleció escribiendo un caso unitario exacto para el valor idéntico (`stock === stockMinimo`), elevando el mutation score por encima del 75% requerido por el curso.
 
 ---
 
-## Fase 8: Automatización E2E con Playwright
+## 📅 Día 10: Pruebas de Extremo a Extremo (E2E) con Playwright
 
-**Contexto:** Simulación de flujos de usuario finales interconectados extremo a extremo.
+**Contexto de Uso:** Simulación automatizada y simbiótica de flujos completos de usuario final en navegadores Chromium sobre la interfaz real enlazada al servidor web.
 
-**Prompt:**
+### Prompt Exacto Enviado:
+> Crea los archivos de pruebas automatizadas E2E en la carpeta `frontend/e2e/` utilizando Playwright (`product-list.spec.ts` y `movement-form.spec.ts`). Debes modelar por completo el flujo mínimo esperado por la rúbrica:
+> 1. Navegación a la lista de productos y verificación de carga de componentes interactivos y badges de color rojo en productos bajo stock mínimo.
+> 2. Navegación al formulario, selección de producto e inserción exitosa de una Entrada de stock, verificando la posterior actualización numérica en el listado.
+> 3. Registro de una Salida válida y su correcto descuento numérico.
+> 4. Intento de una Salida inválida que supere el stock disponible del producto, verificando que la interfaz de usuario capture el evento, bloquee el envío y lance un texto de error explícito en pantalla.
 
-> Crea `frontend/e2e/product-list.spec.ts` y `movement-form.spec.ts` con Playwright cubriendo lista, badges, entrada, salida válida e inválida.
-
-**Artefactos generados:**
-
-| Archivo | Flujo |
-| --- | --- |
-| `e2e/product-list.spec.ts` | Lista, badges rojo/verde, enlaces interactivos |
-| `e2e/movement-form.spec.ts` | Entrada, salida válida, salida inválida bloqueada |
-| `e2e/helpers/api-helpers.ts` | Seed y cleanup vía API |
-| `playwright.config.ts` | Web servers backend + frontend |
+**Reflexión y Refinamiento:** Playwright fallaba inicialmente en local debido a un error de base de datos no disponible (`ECONNREFUSED` puerto 5432). Se solucionó asegurando la ejecución de una instancia PostgreSQL mediante Docker Desktop en Windows 11 antes de lanzar los tests.
 
 ---
 
-## Fase 9: Pipeline CI (GitHub Actions)
+## 🔧 Refactorización, Despliegue en la Nube y Soporte Multi-Entorno
 
-**Contexto:** Automatización de integración continua con PostgreSQL, Jest, Stryker y build frontend/backend.
+**Contexto de Uso:** Resolución de errores en tiempo de despliegue en producción para mitigar problemas de CORS, bases de datos remotas en Render y asertividad de estados vacíos.
 
-**Artefactos generados:**
+### Prompt para Conexión Híbrida de Base de Datos (TypeORM):
+> Revisa el archivo `backend/src/app.module.ts`. Actualmente, el `TypeOrmModule` está configurado leyendo las variables de entorno por separado (`DB_HOST`, `DB_PORT`, etc.). 
+> Modifica la configuración de TypeORM para que intente leer PRIMERO la variable `process.env.DATABASE_URL` (que es la que usa Render en producción). Si `DATABASE_URL` existe, debe usarla directamente mediante la propiedad `url: process.env.DATABASE_URL`. Si no existe, que use por defecto los campos separados (`host`, `port`, `username`, `password`, `database`) que tenemos para el entorno local. 
+> Asegúrate de activar `ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false` para que la base de datos remota de Render no rechace la conexión por falta de SSL.
 
-| Archivo | Descripción |
-| --- | --- |
-| `.github/workflows/ci.yml` | CI en push/PR a `main`/`master` |
-| `backend/package.json` | Script `lint:check` sin `--fix` |
+### Prompt para Habilitar CORS y Resolver Bloqueos de Navegador:
+> El frontend en Vercel recibe un 200 OK pero la respuesta viene vacía (Failed to load response data). Esto se debe a un problema de CORS o a que el controlador no está retornando un JSON válido.
+> Revisa el archivo `backend/src/main.ts` y asegúrate de que tenga activado `app.enableCors()` antes del `app.listen()`. Configúralo para que acepte cualquier origen o específicamente el dominio de Vercel. 
+> Además, revisa el archivo `backend/src/inventory/inventory.controller.ts` (en el endpoint GET `/inventory`) y asegúrate de que el método devuelva explícitamente el resultado del servicio (`return this.inventoryService.findAll()`) y no se quede sin un `return`.
 
----
+### Prompt para Manejo de Estados de Inventario Vacío:
+> El frontend en Vercel ya se conecta con éxito al backend en Render (da un Status Code 200 OK). Sin embargo, está saltando la alerta de 'No se pudo conectar con el servidor'. Esto pasa porque la respuesta del backend es un arreglo vacío `[]` (ya que la base de datos de producción no tiene datos aún) y el frontend lo está tratando erróneamente como un fallo.
+> Revisa el archivo `frontend/src/pages/ProductList.tsx`. Ajusta la lógica del `catch` o de la validación de la respuesta de Axios para que:
+> 1. Solo muestre el mensaje de error si la petición de verdad falló (ej. status diferente a 2xx o error de red).
+> 2. Si la respuesta es exitosa (status 200) pero el arreglo de productos viene vacío (`data.length === 0`), muestre en la interfaz un mensaje limpio en pantalla que diga 'No hay productos registrados en el inventario. ¡Crea el primero!'.
 
-## Fases siguientes (plantillas)
+### Prompt de Navegación Global (UX Completa):
+> Como el inventario actualmente está vacío, no se muestra ningún producto y por lo tanto no hay forma de hacer clic en los botones internos de las tarjetas para ir al formulario de movimientos (`MovementForm`). El PRD exige que ambas pantallas sean accesibles.
+> Modifica el archivo `frontend/src/pages/ProductList.tsx` para agregar un botón o enlace global en la parte superior que diga 'Registrar un Movimiento'. Este botón debe estar visible SIEMPRE (tanto si hay productos como si el inventario está vacío) y debe usar el enrutador (`react-router-dom`) para llevar al usuario a la ruta del formulario `/movement`.
 
-### Fase 10: Formulario de producto (CRUD)
+### Prompt de Limpieza Final de Código (Linting):
+> Actúa como un Desarrollador Full-Stack Senior experto en NestJS, React, TypeScript y ESLint. Necesito que revises y corrijas de forma automática todos los problemas y advertencias de Lint (Linter) que existan en el proyecto, tanto en la carpeta `backend` como en `frontend`.
+> Corrijo problemas de variables no usadas (`no-unused-vars`), importaciones muertas y tipados implícitos en `any` que rompan las ejecuciones automáticas del pipeline de CI de GitHub Actions.
 
-```
-Actúa como desarrollador NestJS Senior. Implementa TICKET-001 del archivo docs/tickets.md:
-módulo products con TypeORM, PostgreSQL, DTOs validados y convenciones de .cursorrules.
-```
-
-### Fase 10: Formulario de producto (CRUD)
-
-```
-Implementa el CRUD de productos en /products/new y /products/:id/edit
-con validación y alertas Axios.
-```
+**Reflexión y Refinamiento:** Esta etapa fue clave para la estabilidad productiva de la aplicación. Al habilitar los orígenes cruzados (CORS) y flexibilizar el procesado de respuestas en Axios frente a arreglos vacíos `[]`, el flujo pasó de romperse silenciosamente en el navegador a renderizar un mensaje dinámico e interactivo impecable. El Linter quedó optimizado, permitiendo un paso exitoso por el workflow automatizado de integración continua.
