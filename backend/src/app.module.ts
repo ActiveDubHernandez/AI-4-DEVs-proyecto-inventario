@@ -18,17 +18,34 @@ import { ProductsModule } from './products/products.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('DB_HOST', 'localhost'),
-        port: configService.get<number>('DB_PORT', 5432),
-        username: configService.get<string>('DB_USERNAME', 'postgres'),
-        password: configService.get<string>('DB_PASSWORD', 'postgres'),
-        database: configService.get<string>('DB_DATABASE', 'inventario'),
-        entities: [Product, Movement],
-        synchronize: configService.get<string>('DB_SYNCHRONIZE', 'false') === 'true',
-        logging: configService.get<string>('DB_LOGGING', 'false') === 'true',
-      }),
+      useFactory: (configService: ConfigService) => {
+        const databaseUrl = process.env.DATABASE_URL;
+        const sharedOptions = {
+          type: 'postgres' as const,
+          entities: [Product, Movement],
+          synchronize:
+            configService.get<string>('DB_SYNCHRONIZE', 'false') === 'true',
+          logging: configService.get<string>('DB_LOGGING', 'false') === 'true',
+        };
+
+        if (databaseUrl) {
+          return {
+            ...sharedOptions,
+            url: databaseUrl,
+            ssl: { rejectUnauthorized: false },
+          };
+        }
+
+        return {
+          ...sharedOptions,
+          host: configService.get<string>('DB_HOST', 'localhost'),
+          port: configService.get<number>('DB_PORT', 5432),
+          username: configService.get<string>('DB_USERNAME', 'postgres'),
+          password: configService.get<string>('DB_PASSWORD', 'postgres'),
+          database: configService.get<string>('DB_DATABASE', 'inventario'),
+          ssl: false,
+        };
+      },
     }),
     ProductsModule,
     MovementsModule,
