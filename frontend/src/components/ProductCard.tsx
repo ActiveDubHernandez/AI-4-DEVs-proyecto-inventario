@@ -53,7 +53,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
       <Link
         className="productCardAction"
-        to={`/movements/new?productId=${product.id}`}
+        to={`/movement?productId=${product.id}`}
       >
         Registrar movimiento
       </Link>

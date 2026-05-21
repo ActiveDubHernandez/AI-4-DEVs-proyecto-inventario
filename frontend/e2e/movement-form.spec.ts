@@ -43,7 +43,7 @@ test.describe('Movement form E2E flow', () => {
   });
 
   test('registers entrada and updates stock in list', async ({ page }) => {
-    await page.goto(`/movements/new?productId=${flowProductId}`);
+    await page.goto(`/movement?productId=${flowProductId}`);
 
     await expect(page.getByTestId('movement-form')).toBeVisible();
     await expect(page.getByLabel('Producto')).toHaveValue(flowProductId, {
@@ -64,7 +64,7 @@ test.describe('Movement form E2E flow', () => {
   });
 
   test('registers valid salida and discounts stock in list', async ({ page }) => {
-    await page.goto(`/movements/new?productId=${flowProductId}`);
+    await page.goto(`/movement?productId=${flowProductId}`);
 
     await page.getByLabel('Tipo de movimiento').selectOption('salida');
     await page.getByLabel('Razón').selectOption('venta');
@@ -83,7 +83,7 @@ test.describe('Movement form E2E flow', () => {
   test('blocks invalid salida exceeding available stock with explicit UI error', async ({
     page,
   }) => {
-    await page.goto(`/movements/new?productId=${flowProductId}`);
+    await page.goto(`/movement?productId=${flowProductId}`);
 
     await page.getByLabel('Tipo de movimiento').selectOption('salida');
     await page.getByLabel('Razón').selectOption('venta');
@@ -96,7 +96,7 @@ test.describe('Movement form E2E flow', () => {
     await expect(submitButton).toBeDisabled();
 
     await submitButton.click({ force: true });
-    await expect(page).toHaveURL(/\/movements\/new/);
+    await expect(page).toHaveURL(/\/movement/);
     await expect(page.getByText('Movimiento registrado correctamente.')).toHaveCount(0);
 
     await page.goto('/');

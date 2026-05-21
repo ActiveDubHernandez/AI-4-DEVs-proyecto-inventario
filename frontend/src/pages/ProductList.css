@@ -11,6 +11,32 @@
   margin-bottom: 2rem;
 }
 
+.productListHeaderTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.productListGlobalAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1.1rem;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.productListGlobalAction:hover {
+  opacity: 0.92;
+}
+
 .productListHeader h1 {
   margin: 0 0 0.5rem;
   font-size: 2rem;

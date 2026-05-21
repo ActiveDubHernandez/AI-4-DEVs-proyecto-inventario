@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ProductCard } from '../components/ProductCard';
 import { api, getApiErrorMessage, mapProductsWithStock } from '../services/api';
 import type { Product, ProductWithStock } from '../types/product';
@@ -38,10 +39,17 @@ export function ProductList() {
   return (
     <main className="productListPage">
       <header className="productListHeader">
-        <h1>Inventario de productos</h1>
-        <p className="productListSubtitle">
-          Productos activos con stock en tiempo real
-        </p>
+        <div className="productListHeaderTop">
+          <div>
+            <h1>Inventario de productos</h1>
+            <p className="productListSubtitle">
+              Productos activos con stock en tiempo real
+            </p>
+          </div>
+          <Link className="productListGlobalAction" to="/movement">
+            Registrar un Movimiento
+          </Link>
+        </div>
       </header>
 
       {isLoading && (
