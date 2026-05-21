@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ProductCard } from '../components/ProductCard';
-import { fetchProductsWithStock, getApiErrorMessage } from '../services/api';
+import {
+  fetchProductsWithStock,
+  getApiErrorMessage,
+  isApiRequestFailure,
+} from '../services/api';
 import type { ProductWithStock } from '../types/product';
 import './ProductList.css';
 
@@ -16,7 +20,14 @@ export function ProductList() {
     try {
       const data = await fetchProductsWithStock();
       setProducts(data);
+      setErrorMessage(null);
     } catch (error) {
+      if (!isApiRequestFailure(error)) {
+        setProducts([]);
+        setErrorMessage(null);
+        return;
+      }
+
       setErrorMessage(getApiErrorMessage(error));
       setProducts([]);
     } finally {
@@ -53,7 +64,9 @@ export function ProductList() {
       )}
 
       {!isLoading && !errorMessage && products.length === 0 && (
-        <p className="productListStatus">No hay productos activos registrados.</p>
+        <p className="productListEmpty" role="status">
+          No hay productos registrados en el inventario. ¡Crea el primero!
+        </p>
       )}
 
       {!isLoading && !errorMessage && products.length > 0 && (

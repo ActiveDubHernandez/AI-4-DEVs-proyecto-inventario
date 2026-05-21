@@ -11,6 +11,28 @@ export const api = axios.create({
 });
 
 /**
+ * Returns true when the HTTP status is in the 2xx range.
+ */
+export function isHttpSuccess(status: number | undefined): boolean {
+  return status !== undefined && status >= 200 && status < 300;
+}
+
+/**
+ * True only for network failures or non-2xx responses (real request failures).
+ */
+export function isApiRequestFailure(error: unknown): boolean {
+  if (!axios.isAxiosError(error)) {
+    return true;
+  }
+
+  if (!error.response) {
+    return true;
+  }
+
+  return !isHttpSuccess(error.response.status);
+}
+
+/**
  * Extracts a user-facing message from NestJS or Axios errors.
  */
 export function getApiErrorMessage(error: unknown): string {
@@ -19,7 +41,12 @@ export function getApiErrorMessage(error: unknown): string {
   }
 
   const axiosError = error as AxiosError<{ message?: string | string[] }>;
-  const message = axiosError.response?.data?.message;
+
+  if (!axiosError.response) {
+    return 'No se pudo conectar con el servidor. Verifica que el backend esté en ejecución.';
+  }
+
+  const message = axiosError.response.data?.message;
 
   if (Array.isArray(message)) {
     return message.join(', ');
@@ -29,15 +56,22 @@ export function getApiErrorMessage(error: unknown): string {
     return message;
   }
 
-  if (axiosError.response?.status === 0 || !axiosError.response) {
-    return 'No se pudo conectar con el servidor. Verifica que el backend esté en ejecución.';
-  }
-
-  return axiosError.message;
+  return `Error del servidor (${axiosError.response.status}). Intenta nuevamente.`;
 }
 
 export async function fetchActiveProducts(): Promise<Product[]> {
-  const { data } = await api.get<Product[]>('/products');
+  const response = await api.get<Product[]>('/products');
+
+  if (!isHttpSuccess(response.status)) {
+    throw response;
+  }
+
+  const { data } = response;
+
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
   return data;
 }
 
@@ -52,6 +86,10 @@ export async function fetchProductsWithStock(): Promise<
   Array<Product & { currentStock: number }>
 > {
   const products = await fetchActiveProducts();
+
+  if (products.length === 0) {
+    return [];
+  }
 
   const productsWithStock = await Promise.all(
     products.map(async (product) => {
