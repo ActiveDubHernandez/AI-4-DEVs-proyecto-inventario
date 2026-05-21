@@ -1,0 +1,36 @@
+.stockBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.stockBadgeOk {
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+}
+
+.stockBadgeDanger {
+  color: #fff;
+  background: #dc2626;
+  border: 1px solid #b91c1c;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+  .stockBadgeOk {
+    color: #86efac;
+    background: rgba(22, 101, 52, 0.35);
+    border-color: #166534;
+  }
+
+  .stockBadgeDanger {
+    background: #ef4444;
+    border-color: #dc2626;
+  }
+}

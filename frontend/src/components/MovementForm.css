@@ -1,0 +1,152 @@
+.movementForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  text-align: left;
+}
+
+.movementFormHeader h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.5rem;
+  color: var(--text-h);
+}
+
+.movementFormHeader p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.movementFormField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.movementFormField label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.movementFormField select,
+.movementFormField input {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-h);
+  font-size: 0.95rem;
+}
+
+.movementFormField select:focus,
+.movementFormField input:focus {
+  outline: 2px solid var(--accent-border);
+  outline-offset: 1px;
+}
+
+.movementFormFieldError {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #b91c1c;
+}
+
+.movementFormStockPanel {
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+}
+
+.movementFormStockPanel p {
+  margin: 0.25rem 0;
+  color: var(--text-h);
+}
+
+.movementFormStockPanelDanger {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.movementFormStockHint {
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.movementFormAlert {
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.movementFormAlertError {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.movementFormAlertSuccess {
+  background: #ecfdf5;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.movementFormAlert button {
+  margin-top: 0.5rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  border: 1px solid currentColor;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.movementFormActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.movementFormSubmitButton,
+.movementFormSecondaryButton {
+  padding: 0.65rem 1.1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.movementFormSubmitButton {
+  border: none;
+  background: var(--accent);
+  color: #fff;
+}
+
+.movementFormSubmitButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.movementFormSecondaryButton {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+@media (prefers-color-scheme: dark) {
+  .movementFormFieldError,
+  .movementFormAlertError {
+    color: #fecaca;
+  }
+
+  .movementFormStockPanelDanger {
+    background: rgba(127, 29, 29, 0.25);
+    border-color: #991b1b;
+  }
+
+  .movementFormAlertSuccess {
+    background: rgba(22, 101, 52, 0.25);
+    color: #86efac;
+  }
+}

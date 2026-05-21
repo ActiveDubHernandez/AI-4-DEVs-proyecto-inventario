@@ -1,0 +1,12 @@
+# Convenciones de Arquitectura del Proyecto
+
+## 1. Reglas Generales (Rules)
+- [cite_start]**Naming**: Backend usa CamelCase para clases y controllers, kebab-case para nombres de archivos (.controller.ts, .service.ts). [cite_start]Frontend usa PascalCase para Componentes y Pages (.tsx).
+- **Manejo de Errores**: Todo error en backend debe usar excepciones nativas de NestJS (BadRequestException, NotFoundException). [cite_start]Frontend debe manejar catch con Axios y mostrar alertas visibles.
+- [cite_start]**Estructura DTOs**: Todo endpoint POST/PATCH en backend debe validar tipos con class-validator y class-transformer.
+
+## 2. Skills de Generación de Código
+- [cite_start]Al implementar servicios de NestJS que modifiquen inventario, encapsula SIEMPRE las operaciones en una transacción TypeORM (`DataSource.transaction`) para evitar condiciones de carrera[cite: 107, 110].
+
+## 3. Comandos Personalizados (Commands)
+- [cite_start]`/new-module <name>`: Comando simulado para crear la estructura de DTO, Entity, Controller y Service del backend respetando Clean Architecture[cite: 97].
