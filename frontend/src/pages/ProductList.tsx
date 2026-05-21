@@ -1,11 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ProductCard } from '../components/ProductCard';
-import {
-  fetchProductsWithStock,
-  getApiErrorMessage,
-  isApiRequestFailure,
-} from '../services/api';
-import type { ProductWithStock } from '../types/product';
+import { api, getApiErrorMessage, mapProductsWithStock } from '../services/api';
+import type { Product, ProductWithStock } from '../types/product';
 import './ProductList.css';
 
 export function ProductList() {
@@ -18,16 +14,16 @@ export function ProductList() {
     setErrorMessage(null);
 
     try {
-      const data = await fetchProductsWithStock();
-      setProducts(data);
+      const response = await api.get<Product[]>('/products');
+      const productos: Product[] = Array.isArray(response.data)
+        ? response.data
+        : [];
+
+      const productsWithStock = await mapProductsWithStock(productos);
+
+      setProducts(productsWithStock);
       setErrorMessage(null);
     } catch (error) {
-      if (!isApiRequestFailure(error)) {
-        setProducts([]);
-        setErrorMessage(null);
-        return;
-      }
-
       setErrorMessage(getApiErrorMessage(error));
       setProducts([]);
     } finally {

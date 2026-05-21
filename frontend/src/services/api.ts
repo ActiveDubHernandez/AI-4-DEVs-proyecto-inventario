@@ -82,26 +82,38 @@ export async function fetchProductStock(productId: string): Promise<ProductStock
   return data;
 }
 
-export async function fetchProductsWithStock(): Promise<
-  Array<Product & { currentStock: number }>
-> {
-  const products = await fetchActiveProducts();
-
-  if (products.length === 0) {
+export async function mapProductsWithStock(
+  productos: Product[],
+): Promise<Array<Product & { currentStock: number }>> {
+  if (productos.length === 0) {
     return [];
   }
 
   const productsWithStock = await Promise.all(
-    products.map(async (product) => {
-      const stock = await fetchProductStock(product.id);
-      return {
-        ...product,
-        currentStock: stock.currentStock,
-      };
+    productos.map(async (product) => {
+      try {
+        const stock = await fetchProductStock(product.id);
+        return {
+          ...product,
+          currentStock: stock.currentStock,
+        };
+      } catch {
+        return {
+          ...product,
+          currentStock: 0,
+        };
+      }
     }),
   );
 
   return productsWithStock;
+}
+
+export async function fetchProductsWithStock(): Promise<
+  Array<Product & { currentStock: number }>
+> {
+  const products = await fetchActiveProducts();
+  return mapProductsWithStock(products);
 }
 
 export async function createMovement(
