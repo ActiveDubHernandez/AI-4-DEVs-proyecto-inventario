@@ -2,11 +2,8 @@ import axios, { type AxiosError } from 'axios';
 import type { CreateMovementPayload, Movement } from '../types/movement';
 import type { Product, ProductStock } from '../types/product';
 
-const apiBaseUrl =
-  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000';
-
 export const api = axios.create({
-  baseURL: apiBaseUrl,
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
   headers: {
     'Content-Type': 'application/json',
   },

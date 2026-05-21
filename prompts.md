@@ -91,7 +91,7 @@ Registro de prompts utilizados para la generación y evolución del proyecto.
 | `frontend/src/components/StockBadge.tsx` | Badge rojo si `stockActual <= stockMinimo` |
 | `frontend/src/components/ProductCard.tsx` | Tarjeta de producto con enlace a movimiento |
 | `frontend/src/pages/ProductList.tsx` | Lista principal con estados loading/error |
-| `frontend/.env.example` | `VITE_API_BASE_URL` |
+| `frontend/.env.example` | `VITE_API_URL` |
 
 ---
 
