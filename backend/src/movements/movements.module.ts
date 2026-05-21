@@ -7,10 +7,7 @@ import { MovementsController } from './movements.controller';
 import { MovementsService } from './movements.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Movement, Product]),
-    InventoryModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Movement, Product]), InventoryModule],
   controllers: [MovementsController],
   providers: [MovementsService],
   exports: [MovementsService],

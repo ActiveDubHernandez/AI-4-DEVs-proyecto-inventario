@@ -1,9 +1,5 @@
 import { expect, test } from '@playwright/test';
-import {
-  createProduct,
-  deactivateProduct,
-  todayIsoDate,
-} from './helpers/api-helpers';
+import { createProduct, deactivateProduct } from './helpers/api-helpers';
 import {
   getCurrentStockFromCard,
   productCard,

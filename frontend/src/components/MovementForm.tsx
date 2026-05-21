@@ -63,7 +63,6 @@ export function MovementForm({ initialProductId }: MovementFormProps) {
   const [isLoadingStock, setIsLoadingStock] = useState(false);
   const [stockFetchError, setStockFetchError] = useState<string | null>(null);
 
-  const [cantidadError, setCantidadError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -82,6 +81,22 @@ export function MovementForm({ initialProductId }: MovementFormProps) {
 
     return parsedCantidad > stockInfo.currentStock;
   }, [isSalida, parsedCantidad, stockInfo]);
+
+  const cantidadError = useMemo(() => {
+    if (!cantidad) {
+      return null;
+    }
+
+    if (parsedCantidad === null) {
+      return 'La cantidad debe ser un entero positivo mayor a cero.';
+    }
+
+    if (exceedsAvailableStock && stockInfo) {
+      return `La cantidad supera el stock disponible (${stockInfo.currentStock}).`;
+    }
+
+    return null;
+  }, [cantidad, parsedCantidad, exceedsAvailableStock, stockInfo]);
 
   const loadProducts = useCallback(async () => {
     setIsLoadingProducts(true);
@@ -106,31 +121,7 @@ export function MovementForm({ initialProductId }: MovementFormProps) {
   }, [loadProducts]);
 
   useEffect(() => {
-    if (!cantidad) {
-      setCantidadError(null);
-      return;
-    }
-
-    if (parsedCantidad === null) {
-      setCantidadError('La cantidad debe ser un entero positivo mayor a cero.');
-      return;
-    }
-
-    if (exceedsAvailableStock && stockInfo) {
-      setCantidadError(
-        `La cantidad supera el stock disponible (${stockInfo.currentStock}).`,
-      );
-      return;
-    }
-
-    setCantidadError(null);
-  }, [cantidad, parsedCantidad, exceedsAvailableStock, stockInfo]);
-
-  useEffect(() => {
     if (!isSalida || !productId) {
-      setStockInfo(null);
-      setStockFetchError(null);
-      setIsLoadingStock(false);
       return;
     }
 

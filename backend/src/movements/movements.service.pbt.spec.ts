@@ -57,8 +57,9 @@ describe('MovementsService PBT integration', () => {
           provide: getDataSourceToken(),
           useValue: {
             transaction: jest.fn(
-              async (callback: (entityManager: EntityManager) => Promise<unknown>) =>
-                callback(manager as unknown as EntityManager),
+              async (
+                callback: (entityManager: EntityManager) => Promise<unknown>,
+              ) => callback(manager as unknown as EntityManager),
             ),
           },
         },
@@ -84,7 +85,9 @@ describe('MovementsService PBT integration', () => {
         fc.integer({ min: 0, max: 300 }),
         fc.integer({ min: 1, max: 300 }),
         async (currentStock, extra) => {
-          inventoryService.calculateCurrentStock.mockResolvedValue(currentStock);
+          inventoryService.calculateCurrentStock.mockResolvedValue(
+            currentStock,
+          );
 
           await expect(
             service.create({

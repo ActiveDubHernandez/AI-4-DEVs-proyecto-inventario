@@ -48,9 +48,10 @@ export function applyMovementWithNonNegativeGuard(
 /**
  * Simulates a sequence of movements, skipping rejected salidas.
  */
-export function simulateMovementSequence(
-  movements: StockMovementRecord[],
-): { finalStock: number; acceptedMovements: StockMovementRecord[] } {
+export function simulateMovementSequence(movements: StockMovementRecord[]): {
+  finalStock: number;
+  acceptedMovements: StockMovementRecord[];
+} {
   let currentStock = 0;
   const acceptedMovements: StockMovementRecord[] = [];
 

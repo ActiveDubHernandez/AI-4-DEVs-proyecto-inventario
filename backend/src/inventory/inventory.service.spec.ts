@@ -69,7 +69,9 @@ describe('InventoryService', () => {
     const stock = await service.calculateCurrentStock(productId);
 
     expect(stock).toBe(37);
-    expect(movementRepository.createQueryBuilder).toHaveBeenCalledWith('movement');
+    expect(movementRepository.createQueryBuilder).toHaveBeenCalledWith(
+      'movement',
+    );
   });
 
   it('should return zero stock when product has no movements', async () => {

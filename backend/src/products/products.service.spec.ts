@@ -86,7 +86,9 @@ describe('ProductsService', () => {
 
   it('should deactivate product logically on remove', async () => {
     productRepository.findOne.mockResolvedValue({ ...baseProduct });
-    productRepository.save.mockImplementation(async (product) => product as Product);
+    productRepository.save.mockImplementation(
+      async (product) => product as Product,
+    );
 
     const result = await service.remove(productId);
 
@@ -101,7 +103,9 @@ describe('ProductsService', () => {
       ...baseProduct,
       movements: [{ id: 'movement-id' } as Product['movements'][number]],
     });
-    productRepository.save.mockImplementation(async (product) => product as Product);
+    productRepository.save.mockImplementation(
+      async (product) => product as Product,
+    );
 
     await service.remove(productId);
 

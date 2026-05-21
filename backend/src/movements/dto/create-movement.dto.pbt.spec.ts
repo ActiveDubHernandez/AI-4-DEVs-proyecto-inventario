@@ -32,11 +32,14 @@ async function hasValidationErrors(dto: CreateMovementDto): Promise<boolean> {
 describe('CreateMovementDto PBT', () => {
   it('P2: accepts only positive integer cantidad values', async () => {
     await fc.assert(
-      fc.asyncProperty(fc.integer({ min: 1, max: 10_000 }), async (cantidad) => {
-        const dto = buildValidDto({ cantidad });
-        const isInvalid = await hasValidationErrors(dto);
-        expect(isInvalid).toBe(false);
-      }),
+      fc.asyncProperty(
+        fc.integer({ min: 1, max: 10_000 }),
+        async (cantidad) => {
+          const dto = buildValidDto({ cantidad });
+          const isInvalid = await hasValidationErrors(dto);
+          expect(isInvalid).toBe(false);
+        },
+      ),
       { numRuns: 120 },
     );
   });
@@ -61,9 +64,9 @@ describe('CreateMovementDto PBT', () => {
   it('P2: rejects decimal cantidad values', async () => {
     await fc.assert(
       fc.asyncProperty(
-        fc.double({ min: 0.01, max: 500, noNaN: true }).filter(
-          (value) => !Number.isInteger(value),
-        ),
+        fc
+          .double({ min: 0.01, max: 500, noNaN: true })
+          .filter((value) => !Number.isInteger(value)),
         async (cantidad) => {
           const dto = buildValidDto({ cantidad });
           const isInvalid = await hasValidationErrors(dto);

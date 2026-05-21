@@ -62,8 +62,9 @@ describe('Critical mutants (M3, M4, M8)', () => {
             provide: getDataSourceToken(),
             useValue: {
               transaction: jest.fn(
-                async (callback: (entityManager: EntityManager) => Promise<unknown>) =>
-                  callback(manager as unknown as EntityManager),
+                async (
+                  callback: (entityManager: EntityManager) => Promise<unknown>,
+                ) => callback(manager as unknown as EntityManager),
               ),
             },
           },
@@ -189,7 +190,9 @@ describe('Critical mutants (M3, M4, M8)', () => {
           InventoryService,
           {
             provide: getRepositoryToken(Movement),
-            useValue: { createQueryBuilder: jest.fn().mockReturnValue(queryBuilder) },
+            useValue: {
+              createQueryBuilder: jest.fn().mockReturnValue(queryBuilder),
+            },
           },
           {
             provide: getRepositoryToken(Product),
@@ -239,7 +242,10 @@ describe('Critical mutants (M3, M4, M8)', () => {
     };
 
     let inventoryService: InventoryService;
-    let productRepository: { findOne: jest.Mock; createQueryBuilder: jest.Mock };
+    let productRepository: {
+      findOne: jest.Mock;
+      createQueryBuilder: jest.Mock;
+    };
 
     beforeEach(async () => {
       productRepository = {

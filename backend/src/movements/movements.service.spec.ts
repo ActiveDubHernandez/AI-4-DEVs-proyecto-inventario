@@ -1,7 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDataSourceToken, getRepositoryToken } from '@nestjs/typeorm';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import { EntityManager } from 'typeorm';
 import { InventoryService } from '../inventory/inventory.service';
 import { Product } from '../products/entities/product.entity';
 import { UnitOfMeasure } from '../products/entities/unit-of-measure.enum';
@@ -13,7 +13,9 @@ import { MovementsService } from './movements.service';
 
 describe('MovementsService', () => {
   let service: MovementsService;
-  let inventoryService: jest.Mocked<Pick<InventoryService, 'calculateCurrentStock'>>;
+  let inventoryService: jest.Mocked<
+    Pick<InventoryService, 'calculateCurrentStock'>
+  >;
   let dataSource: { transaction: jest.Mock };
   let manager: {
     findOne: jest.Mock;
@@ -53,8 +55,9 @@ describe('MovementsService', () => {
     };
 
     dataSource = {
-      transaction: jest.fn(async (callback: (entityManager: EntityManager) => Promise<Movement>) =>
-        callback(manager as unknown as EntityManager),
+      transaction: jest.fn(
+        async (callback: (entityManager: EntityManager) => Promise<Movement>) =>
+          callback(manager as unknown as EntityManager),
       ),
     };
 
@@ -142,8 +145,12 @@ describe('MovementsService', () => {
     manager.findOne.mockResolvedValue(activeProduct);
     inventoryService.calculateCurrentStock.mockResolvedValue(10);
 
-    await expect(service.create(salidaDto)).rejects.toThrow(BadRequestException);
-    await expect(service.create(salidaDto)).rejects.toThrow(/Stock insuficiente/);
+    await expect(service.create(salidaDto)).rejects.toThrow(
+      BadRequestException,
+    );
+    await expect(service.create(salidaDto)).rejects.toThrow(
+      /Stock insuficiente/,
+    );
     expect(manager.save).not.toHaveBeenCalled();
   });
 
@@ -159,7 +166,9 @@ describe('MovementsService', () => {
   it('should reject movement creation when product is not found', async () => {
     manager.findOne.mockResolvedValue(null);
 
-    await expect(service.create(baseMovementDto)).rejects.toThrow(NotFoundException);
+    await expect(service.create(baseMovementDto)).rejects.toThrow(
+      NotFoundException,
+    );
     expect(manager.save).not.toHaveBeenCalled();
   });
 });
